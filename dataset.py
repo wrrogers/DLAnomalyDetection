@@ -79,6 +79,7 @@ class Dataset(Dataset):
         img = img.unsqueeze(0)
         return img
 
+
 if __name__ == "__main__":
     path = r'F:\William\dataset_HDF5'
     train_dataset = Dataset(path=path, mode='train')
