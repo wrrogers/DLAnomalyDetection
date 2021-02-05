@@ -82,19 +82,47 @@ class MVTecDataset(Dataset):
                                          if f.endswith('.png')])
                 x.extend(img_fpath_list)
 
-        #self.file_list = x
-
         return list(x)
     
+    def get_labels(self):
+        img_dir = os.path.join(self.mvtec_folder_path, self.class_name)
+
+        #x = []
+
+        folders = ['train', 'test']
+
+        print()
+        labels  = []
+        for folder in folders:
+            img_types = sorted(os.listdir(os.path.join(img_dir, folder)))
+            
+            for n, img_type in enumerate(img_types):
+                # load images
+                img_type_dir = os.path.join(img_dir, folder, img_type)        
+                length = len(os.listdir(img_type_dir))               
+                good = 0 if img_type_dir.find('good') < 0 else 1                
+                tf = 0 if good == 1 else 1 
+                temp = [tf] * length
+                labels.append(temp)
+                
+                #print(length, folder, img_type_dir)
+        
+        labels = [item for sublist in labels for item in sublist]
+        
+        return labels
+    
 if __name__ == '__main__':
+
     train_dataset = MVTecDataset(class_name='bottle')
     train_dataloader = DataLoader(train_dataset, batch_size=32, pin_memory=True, shuffle=False)
     
-    print(len(train_dataloader))
+    print('N Batches:', len(train_dataloader))
     
-    x = next(iter(train_dataloader))
+    x, ids = next(iter(train_dataloader))
     
-    print(x.size())
+    #print(x.size())
+    print('-------------------------------------------------------------------------------')
+    print('labels:', train_dataset.get_labels())
     
     img1 = np.moveaxis(x[0].detach().cpu().numpy(), 0, -1)
     img1 = (img1 - np.min(img1))/np.ptp(img1)
@@ -107,3 +135,7 @@ if __name__ == '__main__':
     
     plt.imshow(img2)
     plt.show()
+    
+
+
+
